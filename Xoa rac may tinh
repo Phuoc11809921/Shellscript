@@ -1,0 +1,109 @@
+//
+function remove()
+{
+    
+    echo -n "Ban co muon xoa file Y|N ?:   "
+    read a 
+    case $a in 
+    Y|y) 
+         [ -d ~/.local/share/Trash ] || mkdir ~/.local/share/Trash
+   mv $1 ~/.local/share/Trash/files && echo "Xoa thanh cong" 
+         if [ $? -eq 1 ] ; then
+   	 echo "File $1 k ton tai hoac sai duong dan"
+         fi
+	 ;;
+    N|n)
+         echo ""
+    	 ;;
+    esac
+}
+
+function del()
+{
+   rm -rf ~/.local/share/Trash/files/*
+   rm -rf ~/.local/share/Trash/info/*
+   echo "Xoa thanh cong"
+}
+function restore()
+{
+
+	if [ -f ~/.local/share/Trash/files/$1 ] ; then
+	    mv ~/.local/share/Trash/files/$1 $2 && echo "Restore thanh cong file $1 to $2"
+	else 
+	   if [ -d ~/.local/share/Trash/files/$1 ] ; then
+	      mv ~/.local/share/Trash/files/$1 $2 && echo "restore thanh cong Folder $1 to $2"
+	   else
+	      echo "File k ton tai trong recyclebin"
+	   fi
+	fi
+}
+function ham()
+{   
+   
+   echo "1.Move file rac vao recyclebin"
+   echo "2.Restore file ve folder default"
+   echo "3.Delete file "
+   echo "4.List folder recyclebin"
+   echo "5.Exit"
+   lc=1
+   while [ $lc -le 7 ]
+   do
+      echo -n "Nhap lua chon: "
+      read a
+  
+   case $a in 
+   1)
+      echo "Nhap file: "
+      read file 
+      remove $file 
+
+      echo "Xoa file temp "
+      cd /tmp
+      remove /tmp/*
+      ;;
+   2)
+      echo -n "Nhap file:  " 
+      read a
+      restore $a ~/
+      ;;
+   3)
+      echo "Processing."
+      sleep 1
+      echo "Processing.."
+      sleep 1
+      echo "Processing..."
+      sleep 1
+      del
+      ;;
+   4) 
+      cd ~/.local/share/Trash/files && ls -l|| echo "Thu muc rong "
+      ;;  
+   5)  break
+      ;;    
+   *)  echo "Chi nhap tu 1->5"
+ 	;;
+
+   esac
+   done
+}
+ham 
+//
+for host in $(cat ./host_list.txt)
+do
+   echo " ** $host ** "
+   scp ~/scriptempty $(cat ./host_list.txt):~/Desktop
+   ssh $host bash scriptempty || {
+   echo "Error :could not execute $* on $host">&2
+}
+
+done 
+//
+ssh-keygen
+ssh-copy-id -i ~/.ssh/id_rsa.pub $(cat ./host_list.txt)
+ssh $(cat ./host_list.txt) || ssh-add
+
+//
+kunka980@192.168.1.106
+kunka980@192.168.1.102
+
+
